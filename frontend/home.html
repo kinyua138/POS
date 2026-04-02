@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardware POS - Professional Point of Sale System</title>
+    <link rel="stylesheet" href="home.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-cube"></i>
+                <span>Hardware POS</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="/pos.html">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Three.js Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Professional POS System</h1>
+            <p class="hero-subtitle">Powerful inventory, sales, and customer management for your hardware store</p>
+            <button class="cta-button" onclick="document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})">
+                Start Your Free Trial
+            </button>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2>Why Choose Hardware POS?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <h3>Inventory Management</h3>
+                    <p>Track stock levels, low-stock alerts, and automated reordering</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Sales Analytics</h3>
+                    <p>Real-time reports, trends, and revenue insights at your fingertips</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Customer Profiles</h3>
+                    <p>Manage customers, track purchase history, and build loyalty</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <h3>Invoice & Receipts</h3>
+                    <p>Professional invoices with customizable branding and tax support</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Multi-User Security</h3>
+                    <p>Role-based access control with admin and cashier permissions</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Responsive Design</h3>
+                    <p>Works on desktop, tablet, and mobile devices seamlessly</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <h2>Flexible Pricing Plans</h2>
+            <p class="pricing-subtitle">Start with a free 30-day trial. No credit card required.</p>
+            
+            <div class="pricing-grid">
+                <!-- Trial Plan -->
+                <div class="pricing-card trial-card">
+                    <div class="plan-header">
+                        <h3>Trial</h3>
+                        <div class="plan-price">
+                            <span class="currency">KSH</span>
+                            <span class="amount">0</span>
+                            <span class="period">/month</span>
+                        </div>
+                    </div>
+                    <p class="plan-description">Perfect for testing the system</p>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> 30-day free trial</li>
+                        <li><i class="fas fa-check"></i> up to 100 products</li>
+                        <li><i class="fas fa-check"></i> Basic analytics</li>
+                        <li><i class="fas fa-times"></i> No multi-user support</li>
+                        <li><i class="fas fa-times"></i> Email support only</li>
+                    </ul>
+                    <button class="plan-button trial-btn" onclick="startTrial()">Start Free Trial</button>
+                </div>
+
+                <!-- Starter Plan -->
+                <div class="pricing-card">
+                    <div class="plan-badge">Popular</div>
+                    <div class="plan-header">
+                        <h3>Starter</h3>
+                        <div class="plan-price">
+                            <span class="currency">KSH</span>
+                            <span class="amount">1,500</span>
+                            <span class="period">/month</span>
+                        </div>
+                    </div>
+                    <p class="plan-description">Great for small stores</p>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> Unlimited products</li>
+                        <li><i class="fas fa-check"></i> Advanced analytics</li>
+                        <li><i class="fas fa-check"></i> up to 3 users</li>
+                        <li><i class="fas fa-check"></i> Email & chat support</li>
+                        <li><i class="fas fa-times"></i> No custom branding</li>
+                    </ul>
+                    <button class="plan-button primary-btn" onclick="selectPlan('Starter', 1500)">Choose Plan</button>
+                </div>
+
+                <!-- Professional Plan -->
+                <div class="pricing-card">
+                    <div class="plan-header">
+                        <h3>Professional</h3>
+                        <div class="plan-price">
+                            <span class="currency">KSH</span>
+                            <span class="amount">3,500</span>
+                            <span class="period">/month</span>
+                        </div>
+                    </div>
+                    <p class="plan-description">Perfect for growing businesses</p>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> Unlimited everything</li>
+                        <li><i class="fas fa-check"></i> up to 10 users</li>
+                        <li><i class="fas fa-check"></i> Supplier management</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                        <li><i class="fas fa-check"></i> Custom branding</li>
+                    </ul>
+                    <button class="plan-button primary-btn" onclick="selectPlan('Professional', 3500)">Choose Plan</button>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="pricing-card">
+                    <div class="plan-header">
+                        <h3>Enterprise</h3>
+                        <div class="plan-price">
+                            <span class="currency">KSH</span>
+                            <span class="amount">7,500</span>
+                            <span class="period">/month</span>
+                        </div>
+                    </div>
+                    <p class="plan-description">For large operations</p>
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> All Professional features</li>
+                        <li><i class="fas fa-check"></i> Unlimited users</li>
+                        <li><i class="fas fa-check"></i> Multi-store management</li>
+                        <li><i class="fas fa-check"></i> 24/7 dedicated support</li>
+                        <li><i class="fas fa-check"></i> API access</li>
+                    </ul>
+                    <button class="plan-button primary-btn" onclick="selectPlan('Enterprise', 7500)">Choose Plan</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Auth Choice Modal -->
+    <div class="modal" id="authChoiceModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="close-btn" onclick="closeAuthModal()">&times;</button>
+            <h2>Get Started</h2>
+            <p style="color: #666; text-align: center; margin-bottom: 2rem;">
+                Selected Plan: <strong id="authPlanDisplay">Starter (KSH 1,500)</strong>
+            </p>
+            
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <button class="primary-btn" style="width: 100%; padding: 14px;" onclick="showLoginForm()">
+                    <i class="fas fa-sign-in-alt"></i> I Already Have an Account
+                </button>
+                <button class="primary-btn" style="width: 100%; padding: 14px; background: #666;" onclick="showRegisterForm()">
+                    <i class="fas fa-user-plus"></i> Create New Account
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="close-btn" onclick="closeAuthModal()">&times;</button>
+            <h2>Login to Your Account</h2>
+            
+            <form id="loginForm" onsubmit="event.preventDefault(); handleLoginForm()">
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Password *</label>
+                    <div style="position: relative;">
+                        <input type="password" id="loginPassword" placeholder="Your password" required>
+                        <i class="fas fa-eye" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer;" onclick="togglePasswordVisibility('loginPassword')"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="payment-btn" style="width: 100%;">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+
+            <div style="margin: 1.5rem 0; position: relative;">
+                <div style="border-top: 1px solid #ddd; position: absolute; width: 100%;"></div>
+                <div style="background: white; position: relative; text-align: center;">
+                    <span style="padding: 0 10px; color: #999; font-size: 0.9rem;">OR</span>
+                </div>
+            </div>
+
+            <button class="google-btn" id="googleLoginBtn">
+                <img src="https://www.gstatic.com/firebaseapp/v8.2.0/images/firebaseui-logo-accounts.png" style="width: 20px; margin-right: 10px;">
+                Login with Google
+            </button>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="close-btn" onclick="closeAuthModal()">&times;</button>
+            <h2>Create Your Account</h2>
+            
+            <form id="registerForm" onsubmit="event.preventDefault(); handleRegisterForm()">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="regFullName" placeholder="John Doe" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="regEmail" placeholder="your@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number *</label>
+                    <input type="tel" id="regPhone" placeholder="+254 701 234 567" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Company Name</label>
+                    <input type="text" id="regCompanyName" placeholder="Your Hardware Store">
+                </div>
+
+                <div class="form-group">
+                    <label>Password *</label>
+                    <div style="position: relative;">
+                        <input type="password" id="regPassword" placeholder="Min 6 characters" required minlength="6">
+                        <i class="fas fa-eye" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer;" onclick="togglePasswordVisibility('regPassword')"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="payment-btn" style="width: 100%;">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
+
+            <div style="margin: 1.5rem 0; position: relative;">
+                <div style="border-top: 1px solid #ddd; position: absolute; width: 100%;"></div>
+                <div style="background: white; position: relative; text-align: center;">
+                    <span style="padding: 0 10px; color: #999; font-size: 0.9rem;">OR</span>
+                </div>
+            </div>
+
+            <button class="google-btn" id="googleRegisterBtn">
+                <img src="https://www.gstatic.com/firebaseapp/v8.2.0/images/firebaseui-logo-accounts.png" style="width: 20px; margin-right: 10px;">
+                Sign up with Google
+            </button>
+        </div>
+    </div>
+
+    <!-- Payment Modal (for trial pay-later option) -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closePaymentModal()">&times;</button>
+            <h2>Complete Your Trial Setup</h2>
+            
+            <div class="payment-summary">
+                <div class="summary-row">
+                    <span>Plan:</span>
+                    <strong id="payPlanName">Trial</strong>
+                </div>
+                <div class="summary-row">
+                    <span>Duration:</span>
+                    <strong>30 days</strong>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin: 1.5rem 0;">
+                <button class="payment-btn" style="flex: 1;" onclick="completeTrialSignup()">
+                    <i class="fas fa-check"></i> Start Free Trial
+                </button>
+            </div>
+
+            <p class="payment-note">No payment required. Full access for 30 days.</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Hardware POS. All rights reserved.</p>
+            <p>Payments secured by <strong>Paystack</strong></p>
+        </div>
+    </footer>
+
+    <script src="home.js"></script>
+</body>
+</html>

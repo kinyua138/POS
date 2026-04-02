@@ -1,0 +1,16 @@
+node_modules
+.env
+.git
+server.js
+db.js
+models/
+native/
+package-lock.json
+*.sqlite-backup
+*.node.bak
+hardware_pos.db
+session.db
+Launch-POS.vbs
+pkg.log
+*.exe
+.vscode/

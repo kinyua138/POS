@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardware Pro | Business POS</title>
+    <title id="pageTitleTag">Hardware Pro | Business POS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="pos.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <!-- --------------  FIRST-RUN WIZARD  -------------- -->
+    <div class="login-overlay" id="firstRunOverlay" role="dialog" aria-modal="true" aria-labelledby="frTitle">
+        <div class="login-box">
+            <h2 id="frTitle">Welcome – Set up your store</h2>
+                <form id="firstRunForm" onsubmit="pos.handleFirstRun(event)">
+                <div class="form-group"><label>Business / Store Name *</label><input type="text" id="frCompany" required></div>
+                <div class="form-group"><label>Currency Symbol *</label><input type="text" id="frCurrency" value="$" required></div>
+                <div class="form-group"><label>Tax Rate (%)</label><input type="number" id="frTax" step="0.1" value="10"></div>
+                <div class="form-group"><label>Low-Stock Alert Level</label><input type="number" id="frLowStock" value="10" min="1"></div>
+                <hr style="margin:20px 0;border:none;border-top:1px solid #e9ecef">
+                <div class="form-group"><label>Admin Username *</label><input type="text" id="frUsername" required></div>
+                <div class="form-group"><label>Admin Full Name *</label><input type="text" id="frName" required></div>
+                <div class="form-group"><label>Admin Password *</label>
+                <div style="position:relative;">
+                <input type="password" id="frPassword" required minlength="5" placeholder="Min 5 characters">
+                <i class="fas fa-eye toggle-pw" onclick="pos.togglePw('frPassword')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;"></i>
+            </div>
+        </div>
+                <div class="form-group"><label>Confirm Password *</label>
+                    <div style="position:relative;">
+                        <input type="password" id="frPasswordConfirm" required minlength="5" placeholder="Re-enter password">
+                        <i class="fas fa-eye toggle-pw" onclick="pos.togglePw('frPasswordConfirm')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;"></i>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary form-full">Create Account & Start Selling</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- --------------  LOGIN OVERLAY  -------------- -->
+    <div class="login-overlay" id="loginOverlay" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+        <div class="login-box">
+            <img id="loginLogo" style="width:60px;height:60px;border-radius:12px;margin-bottom:15px;display:none">
+            <h2 id="loginTitle">Hardware POS Login</h2>
+            <form id="loginForm" onsubmit="event.preventDefault(); pos.handleLogin()">
+                <div class="form-group form-full"><label for="loginEmail">Email</label><input type="email" id="loginEmail" required></div>
+                <div class="form-group form-full"><label for="loginPassword">Password</label>
+                <div style="position:relative;">
+                    <input type="password" id="loginPassword" required>
+                    <i class="fas fa-eye toggle-pw" onclick="pos.togglePw('loginPassword')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;"></i>
+                </div>
+                </div>
+                <div style="text-align:right;font-size:12px;margin-top:-10px;margin-bottom:15px;">
+                    <span class="signup-link" onclick="pos.redirectToSignup()" style="cursor:pointer;color:var(--secondary);">Create Account</span>
+                </div>
+                <button type="submit" class="btn btn-primary form-full" style="margin-top: 20px;"><i class="fas fa-sign-in-alt"></i> Log In</button>
+            </form>
+            
+            <div style="margin: 1.5rem 0; position: relative;">
+                <div style="border-top: 1px solid #ddd; position: absolute; width: 100%;"></div>
+                <div style="background: white; position: relative; text-align: center;">
+                    <span style="padding: 0 10px; color: #999; font-size: 0.9rem;">OR</span>
+                </div>
+            </div>
+            
+            <button type="button" class="btn" id="googleLoginPosBtn" style="width: 100%; background: white; color: #333; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px;">
+                <img src="https://www.gstatic.com/firebaseapp/v8.2.0/images/firebaseui-logo-accounts.png" style="width: 20px;">
+                Login with Google
+            </button>
+            
+            <p style="margin-top: 15px; font-size: 12px; color: var(--light-text);">designed by Tosh.dev.</p>
+        </div>
+    </div>
+
+    <!-- --------------  PASSWORD-CHANGE MODAL  -------------- -->
+    <div class="modal" id="passwordChangeModal" role="dialog" aria-modal="true" aria-labelledby="passwordChangeTitle">
+        <div class="modal-content">
+            <h3 id="passwordChangeTitle">Change Password</h3>
+            <form onsubmit="event.preventDefault(); pos.handleChangePassword()">
+                <div class="form-group"><label for="oldPassword">Current Password</label><input type="password" id="oldPassword" required></div>
+                <div class="form-group"><label for="newPassword">New Password (Min 5 characters)</label><input type="password" id="newPassword" required></div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="pos.hidePasswordChangeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============ PLAN UPGRADE MODAL ============ -->
+    <div class="modal" id="planUpgradeModal" role="dialog" aria-modal="true">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <button class="close-btn" onclick="pos.hidePlanUpgradeModal()" style="position: absolute; right: 15px; top: 15px; background: none; border: none; font-size: 28px; cursor: pointer;">&times;</button>
+            
+            <h2 style="margin-top: 0;">Upgrade Your Plan</h2>
+            
+            <div id="currentPlanInfo" style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 30px;">
+                <div style="font-size: 14px; color: #666;">Current Plan:</div>
+                <div style="font-size: 1.5rem; font-weight: bold;" id="currentPlanName">Loading...</div>
+                <div style="font-size: 12px; color: #999; margin-top: 5px;" id="currentPlanFeatures"></div>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <h3>Available Plans</h3>
+                <div id="plansGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <!-- Plans will be inserted here by JavaScript -->
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+                <button type="button" class="btn btn-secondary" onclick="pos.hidePlanUpgradeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ MAIN APP ============ -->
+    <div class="app-container" id="appContainer">
+        <!-- --------------  SIDEBAR  -------------- -->
+        <nav class="sidebar" aria-label="Main navigation">
+            <div class="logo-container">
+                <div class="logo-icon">POS</div>
+                <div class="logo-text">Hardware Pro</div>
+            </div>
+            <div class="nav-section">
+                <div class="nav-title">Menu</div>
+                <div class="nav-item active" data-tab="dashboard" onclick="pos.switchTab('dashboard')"><i class="fas fa-tachometer-alt"></i> Dashboard</div>
+                <div class="nav-item" data-tab="pos" onclick="pos.switchTab('pos')"><i class="fas fa-cash-register"></i> Point of Sale</div>
+                <div class="nav-item cashier-hidden" data-tab="sales" onclick="pos.switchTab('sales')"><i class="fas fa-chart-line"></i> Sales History</div>
+                <div class="nav-item admin-only" data-tab="inventory" onclick="pos.switchTab('inventory')"><i class="fas fa-warehouse"></i> Inventory</div>
+                <div class="nav-item admin-only" data-tab="customers" onclick="pos.switchTab('customers')"><i class="fas fa-users"></i> Customers</div>
+                <div class="nav-item admin-only" data-tab="invoices" onclick="pos.switchTab('invoices')"><i class="fas fa-file-invoice-dollar"></i> Invoices</div>
+                <div class="nav-item admin-only" data-tab="suppliers" onclick="pos.switchTab('suppliers')"><i class="fas fa-truck-loading"></i> Suppliers</div>
+            </div>
+            <div class="nav-section">
+                <div class="nav-title">System</div>
+                <div class="nav-item admin-only" data-tab="users" onclick="pos.switchTab('users')"><i class="fas fa-users-cog"></i> Users</div>
+                <div class="nav-item admin-only" data-tab="settings" onclick="pos.switchTab('settings')"><i class="fas fa-cogs"></i> Settings</div>
+                <div class="nav-item" onclick="pos.showPasswordChangeModal()"><i class="fas fa-key"></i> Change Password</div>
+                <div class="nav-item" onclick="pos.logout()"><i class="fas fa-sign-out-alt"></i> Log Out</div>
+            </div>
+        </nav>
+
+        <!-- --------------  MAIN CONTENT  -------------- -->
+        <main class="main-content" role="main">
+            <div class="top-bar">
+                <div class="page-title" id="pageTitle">Dashboard</div>
+                <div class="user-controls">
+                    <div class="user-menu" onclick="pos.logout()">
+                        <div class="user-avatar" id="userAvatarText">A</div>
+                        <div>
+                            <div style="font-weight: 700;" id="userName">Admin</div>
+                            <div style="font-size: 11px; opacity: .8;" id="userRole">ADMIN</div>
+                        </div>
+                        <i class="fas fa-chevron-down" style="font-size: 10px; opacity: .8;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- --------------  DASHBOARD  -------------- -->
+                <div class="tab-content active" id="dashboard">
+                    <div class="dashboard-cards">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Today's Revenue</div>
+                                <div class="card-icon" style="background: var(--primary);"><i class="fas fa-dollar-sign"></i></div>
+                            </div>
+                            <div class="card-value" id="revenueCardValue">$0.00</div>
+                            <div class="card-change positive" id="revenueCardChange"><i class="fas fa-arrow-up"></i> 0% vs Yesterday</div>
+                        </div>
+                        <div class="card cashier-hidden">
+                            <div class="card-header">
+                                <div class="card-title">Today's Profit</div>
+                                <div class="card-icon" style="background: var(--success);"><i class="fas fa-money-bill-wave"></i></div>
+                            </div>
+                            <div class="card-value" id="profitCardValue">$0.00</div>
+                            <div class="card-change positive" id="profitCardChange"><i class="fas fa-arrow-up"></i> 0% vs Yesterday</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Transactions Count</div>
+                                <div class="card-icon" style="background: var(--info);"><i class="fas fa-receipt"></i></div>
+                            </div>
+                            <div class="card-value" id="transactionsCardValue">0</div>
+                            <div class="card-change positive" id="transactionsCardChange"><i class="fas fa-arrow-up"></i> 0% vs Yesterday</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Low Stock Items</div>
+                                <div class="card-icon" style="background: var(--danger);"><i class="fas fa-boxes"></i></div>
+                            </div>
+                            <div class="card-value" id="lowStockCardValue">0</div>
+                            <div class="card-change negative" id="lowStockCardChange"><i class="fas fa-exclamation-triangle"></i> Check Inventory</div>
+                        </div>
+                    </div>
+
+                    <div class="main-grid">
+                        <div class="products-section" style="grid-column: 1 / -1;">
+                            <div class="section-header">
+                                <div class="section-title">Recent Sales History</div>
+                                    <div class="section-controls admin-only">
+                                    <button class="btn btn-sm btn-secondary" onclick="pos.setRecentRange('day')"   id="btnRecentDay">Day</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="pos.setRecentRange('week')"  id="btnRecentWeek">Week</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="pos.setRecentRange('month')" id="btnRecentMonth">Month</button>
+                                </div>
+                                <div class="section-controls">
+                                    <button class="btn btn-secondary cashier-hidden" onclick="pos.switchTab('sales')"><i class="fas fa-chart-line"></i> View All</button>
+                                </div>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr><th>ID</th><th>Date</th><th>Items</th><th>Method</th><th>Total</th><th>Cashier</th></tr>
+                                </thead>
+                                <tbody id="recentSalesTable"><tr><td colspan="6" class="loading">Loading recent sales...</td></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- --------------  POS  -------------- -->
+                <div class="tab-content" id="pos">
+                    <div class="main-grid">
+                        <div class="products-section">
+                            <div class="section-header">
+                                <div class="section-title">Products</div>
+                                <div class="section-controls">
+                                    <input type="text" id="posSearch" placeholder="Search products..." oninput="pos.loadProducts()">
+                                    <select id="posCategoryFilter" onchange="pos.loadProducts()">
+                                        <option value="">All Categories</option>
+                                        <option value="tools">Hand Tools</option>
+                                        <option value="power-tools">Power Tools</option>
+                                        <option value="materials">Building Materials</option>
+                                        <option value="fasteners">Fasteners</option>
+                                        <option value="plumbing">Plumbing</option>
+                                        <option value="electrical">Electrical</option>
+                                        <option value="paint">Paint & Supplies</option>
+                                        <option value="safety">Safety Equipment</option>
+                                    </select>
+                                    <button class="btn btn-secondary admin-only" id="posNewProductBtn" onclick="pos.switchTab('inventory'); pos.showProductForm()"><i class="fas fa-plus"></i> New Product</button>
+                                </div>
+                            </div>
+                            <div class="products-grid" id="productsGrid"><div class="loading">Loading products...</div></div>
+                        </div>
+
+                        <div class="cart-section">
+                            <div class="section-header">
+                                <div class="section-title">Current Sale</div>
+                                <div class="section-controls">
+                                    <button class="btn btn-secondary" onclick="pos.clearCart()"><i class="fas fa-trash"></i> Clear Cart</button>
+                                </div>
+                            </div>
+                            <div class="cart-items" id="cartItems"><div class="loading" style="text-align: center;">Cart is empty.</div></div>
+                            <div class="cart-summary" aria-live="polite">
+                                <div class="summary-row"><span>Subtotal:</span><span id="cartSubtotal">$0.00</span></div>
+                                <div class="summary-row"><span>Tax (<span id="taxRateDisplay">0%</span>):</span><span id="cartTax">$0.00</span></div>
+                                <div class="summary-total summary-row"><span>TOTAL:</span><span id="cartTotal">$0.00</span></div>
+                            </div>
+                            <div class="payment-actions">
+                                <button class="payment-btn cash" onclick="pos.checkout('Cash')"><i class="fas fa-money-bill-wave"></i> Pay with Cash</button>
+                                <button class="payment-btn card" onclick="pos.checkout('Card')"><i class="fas fa-credit-card"></i> Pay with Card</button>
+                                <button class="payment-btn invoice" onclick="pos.checkout('Invoice')"><i class="fas fa-file-invoice-dollar"></i> Create Invoice</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- --------------  SALES HISTORY  -------------- -->
+                <div class="tab-content cashier-hidden" id="sales">
+                    <!-- LINE CHART -->
+                    <div id="salesChartContainer">
+                        <div class="section-header">
+                            <div class="section-title">Sales Trend (Last 7 Days)</div>
+                            <button class="btn btn-secondary" onclick="pos.generateSalesPDF()"><i class="fas fa-download"></i> Download PDF Report</button>
+                        </div>
+                        <canvas id="salesLineChart" height="100"></canvas>
+                    </div>
+
+                    <div class="management-section">
+                        <div class="section-header">
+                            <div class="section-title">Sales History</div>
+                            <div class="section-controls">
+                                <div class="search-filter">
+                                    <input type="text" id="saleSearch" placeholder="Search by ID or Total..." oninput="pos.loadSales()">
+                                    <input type="date" id="saleDateFilter" onchange="pos.loadSales()">
+                                    <select id="saleMethodFilter" onchange="pos.loadSales()">
+                                        <option value="">All Methods</option>
+                                        <option value="Cash">Cash</option>
+                                        <option value="Card">Card</option>
+                                        <option value="Invoice">Invoice</option>
+                                    </select>
+                                    <select id="saleCashierFilter" onchange="pos.loadSales()" style="display:none;"><option value="">All Cashiers</option></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="flex: 1; overflow-y: auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr><th>ID</th><th>Date</th><th>Items</th><th>Method</th><th>Total</th><th>Cashier</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="salesTable"><tr><td colspan="7" class="loading">Loading sales history...</td></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- --------------  INVENTORY  -------------- -->
+                <div class="tab-content admin-only" id="inventory">
+                    <div class="management-section">
+                        <div class="section-header">
+                            <div class="section-title">Inventory & Products</div>
+                            <div class="section-controls">
+                                <button class="btn btn-secondary" onclick="pos.showProductForm()"><i class="fas fa-plus"></i> Add New Product</button>
+                            </div>
+                        </div>
+                        <div class="card" id="productForm" style="margin-bottom: 20px; display: none;">
+                            <h3 id="formTitle">Add New Product</h3>
+                            <form id="productFormElement" onsubmit="pos.saveProduct(event)">
+                                <input type="hidden" id="productId">
+                                <div class="form-grid">
+                                    <div class="form-group"><label for="pName">Product Name *</label><input type="text" id="pName" required></div>
+                                    <div class="form-group"><label for="pPrice">Price *</label><input type="number" id="pPrice" step="0.01" min="0" required></div>
+                                    <div class="form-group"><label for="pCost">Cost Price</label><input type="number" id="pCost" step="0.01" min="0" placeholder="Optional"></div>
+                                    <div class="form-group"><label for="pStock">Stock Quantity *</label><input type="number" id="pStock" min="0" required></div>
+                                    <div class="form-group"><label for="pCategory">Category *</label>
+                                        <select id="pCategory" required>
+                                            <option value="tools">Hand Tools</option><option value="power-tools">Power Tools</option>
+                                            <option value="materials">Building Materials</option><option value="fasteners">Fasteners</option>
+                                            <option value="plumbing">Plumbing</option><option value="electrical">Electrical</option>
+                                            <option value="paint">Paint & Supplies</option><option value="safety">Safety Equipment</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>Product Image</label>
+                                        <input type="file" id="pImageFile" accept="image/*" onchange="pos.previewProductImage(this)">
+                                        <img id="pImagePreview" class="img-thumb" src="" alt="Preview" style="display:none;">
+                                    </div>
+                                    <div class="form-group"><label for="pSKU">SKU (Optional)</label><input type="text" id="pSKU"></div>
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Product</button>
+                                    <button type="button" class="btn btn-secondary" onclick="pos.cancelProductForm()"><i class="fas fa-times"></i> Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div style="flex: 1; overflow-y: auto;">
+                            <div class="search-filter">
+                                <input type="text" id="inventorySearch" placeholder="Search products by name..." oninput="pos.loadInventory()">
+                                <select id="inventoryCategoryFilter" onchange="pos.loadInventory()">
+                                    <option value="">All Categories</option>
+                                    <option value="tools">Hand Tools</option><option value="power-tools">Power Tools</option>
+                                    <option value="materials">Building Materials</option><option value="fasteners">Fasteners</option>
+                                    <option value="plumbing">Plumbing</option><option value="electrical">Electrical</option>
+                                    <option value="paint">Paint & Supplies</option><option value="safety">Safety Equipment</option>
+                                </select>
+                                <select id="inventoryStockFilter" onchange="pos.loadInventory()">
+                                    <option value="">All Stock Levels</option><option value="low">Low Stock</option><option value="medium">Medium Stock</option><option value="high">High Stock</option>
+                                </select>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr><th>ID</th><th>SKU</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="inventoryTable"><tr><td colspan="7" class="loading">Loading inventory...</td></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- --------------  CUSTOMERS  -------------- -->
+                <div class="tab-content admin-only" id="customers">
+                    <div class="management-section">
+                        <div class="section-header">
+                            <div class="section-title">Customer Management</div>
+                            <div class="section-controls">
+                                <button class="btn btn-primary" onclick="pos.showCustomerForm()"><i class="fas fa-user-plus"></i> Add New Customer</button>
+                            </div>
+                        </div>
+                        <div class="card" id="customerForm" style="margin-bottom: 20px; display: none;">
+                            <h3 id="customerFormTitle">Add New Customer</h3>
+                            <form id="customerFormElement" onsubmit="pos.saveCustomer(event)">
+                                <input type="hidden" id="customerId">
+                                <div class="form-grid">
+                                    <div class="form-group"><label for="cName">Full Name *</label><input type="text" id="cName" required></div>
+                                    <div class="form-group"><label for="cPhone">Phone *</label><input type="tel" id="cPhone" required></div>
+                                    <div class="form-group"><label for="cEmail">Email</label><input type="email" id="cEmail"></div>
+                                    <div class="form-group"><label for="cType">Customer Type</label>
+                                        <select id="cType">
+                                            <option value="retail">Retail</option><option value="trade">Trade/Contractor</option><option value="corporate">Corporate</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group form-full"><label for="cAddress">Address</label><textarea id="cAddress" rows="2" placeholder="Street, City, Postcode"></textarea></div>
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-user-check"></i> Save Customer</button>
+                                    <button type="button" class="btn btn-secondary" onclick="pos.cancelCustomerForm()"><i class="fas fa-times"></i> Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div style="flex: 1; overflow-y: auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="customersTable"><tr><td colspan="5" class="loading">Loading customers...</td></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- --------------  INVOICES  -------------- -->
+                <div class="tab-content admin-only" id="invoices">
+                    <div class="management-section">
+                        <div class="section-header">
+                            <div class="section-title">Invoice Management</div>
+                            <div class="section-controls">
+                                <button class="btn btn-primary" onclick="pos.showInvoiceForm()"><i class="fas fa-file-alt"></i> Create New Invoice</button>
+                            </div>
+                        </div>
+
+                        <!-- LIST -->
+                        <div style="flex:1;overflow-y:auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr><th>Invoice #</th><th>Customer</th><th>Date</th><th>Due Date</th><th>Total</th><th>Status</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="invoicesTable"><tr><td colspan="7" class="loading">Loading invoices…</td></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- FORM / PREVIEW -->
+                    <div class="card" id="invoiceForm" style="margin-bottom:20px;display:none;">
+                        <h3 id="invoiceFormTitle">New Service Invoice</h3>
+
+                        <form id="invoiceFormElement" onsubmit="pos.saveInvoice(event)">
+                            <input type="hidden" id="invoiceId">
+
+                            <div class="form-grid">
+                                <div class="form-group"><label for="invNumber">Invoice Name/Number *</label><input type="text" id="invNumber" readonly required></div>
+                                <div class="form-group"><label for="invCustomer">Customer *</label><select id="invCustomer" required></select></div>
+                                <div class="form-group"><label for="invDueDate">Due Date *</label><input type="date" id="invDueDate" required></div>
+                                <div class="form-group"><label for="invPaymentTerms">Payment Terms</label>
+                                    <select id="invPaymentTerms">
+                                        <option value="Net 30">Net 30 Days</option>
+                                        <option value="Net 15">Net 15 Days</option>
+                                        <option value="Due on Receipt">Due on Receipt</option>
+                                    </select>
+                                </div>
+                                <div class="form-group"><label for="invStatus">Status</label>
+                                    <select id="invStatus">
+                                        <option value="PENDING">Pending</option>
+                                        <option value="PAID">Paid</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- ITEMS -->
+                            <h4 style="margin-top:20px;margin-bottom:10px;color:var(--primary-dark);">Invoice Items</h4>
+                            <div id="invoiceItemsHeader" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 50px;gap:10px;margin-bottom:5px;font-weight:700;color:var(--light-text);font-size:12px;text-transform:uppercase;">
+                                <span>Description</span><span>Qty</span><span>Unit Price</span><span>Total</span><span></span>
+                            </div>
+                            <div id="invoiceItems"></div>
+                            <button type="button" class="btn btn-secondary" onclick="pos.addInvoiceItem()" style="margin-top:10px;"><i class="fas fa-plus"></i> Add Item</button>
+
+                            <!-- NOTES -->
+                            <div class="form-group form-full" style="margin-top:15px;">
+                                <label for="invNotes">Notes / Terms</label>
+                                <textarea id="invNotes" rows="3" placeholder="Payment details, bank info, warranty terms…"></textarea>
+                            </div>
+
+                            <!-- TOTALS -->
+                            <div class="form-grid" style="grid-template-columns:1fr 1fr;margin-top:20px;">
+                                <div></div>
+                                <div class="form-group" style="text-align:right;">
+                                    <div style="font-weight:600;">Subtotal: <span id="invSubtotal">$0.00</span></div>
+                                    <div style="font-weight:600;">Tax (<span id="invTaxRate">0%</span>): <span id="invTax">$0.00</span></div>
+                                    <div style="font-weight:800;font-size:18px;color:var(--primary);border-top:1px solid var(--border);padding-top:5px;margin-top:5px;">TOTAL: <span id="invTotal">$0.00</span></div>
+                                </div>
+                            </div>
+
+                            <!-- BUTTONS -->
+                            <div style="display:flex;gap:10px;margin-top:20px;">
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-file-export"></i> Save & Generate PDF</button>
+                                <button type="button" class="btn btn-secondary" onclick="pos.cancelInvoiceForm()"><i class="fas fa-times"></i> Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- --------------  /INVOICES  -------------- -->
+
+                <!-- --------------  SUPPLIERS  -------------- -->
+                <div class="tab-content admin-only" id="suppliers">
+                    <div class="management-section">
+                        <div class="section-header">
+                            <div class="section-title">Supplier Management</div>
+                            <div class="section-controls">
+                                <button class="btn btn-primary" onclick="pos.showSupplierForm()"><i class="fas fa-user-tie"></i> Add New Supplier</button>
+                            </div>
+                        </div>
+                        <div class="card" id="supplierForm" style="margin-bottom: 20px; display: none;">
+                            <h3 id="supplierFormTitle">Add New Supplier</h3>
+                            <form id="supplierFormElement" onsubmit="pos.saveSupplier(event)">
+                                <input type="hidden" id="supplierId">
+                                <div class="form-grid">
+                                    <div class="form-group"><label for="sName">Company Name *</label><input type="text" id="sName" required></div>
+                                    <div class="form-group"><label for="sContact">Contact Person</label><input type="text" id="sContact"></div>
+                                    <div class="form-group"><label for="sPhone">Phone *</label><input type="tel" id="sPhone" required></div>
+                                    <div class="form-group"><label for="sEmail">Email</label><input type="email" id="sEmail"></div>
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-truck"></i> Save Supplier</button>
+                                    <button type="button" class="btn btn-secondary" onclick="pos.cancelSupplierForm()"><i class="fas fa-times"></i> Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div style="flex: 1; overflow-y: auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr><th>ID</th><th>Company Name</th><th>Contact</th><th>Phone</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="suppliersTable"><tr><td colspan="5" class="loading">Loading suppliers...</td></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- --------------  SETTINGS  -------------- -->
+
+                <!-- --------------  USER MANAGEMENT  -------------- -->
+                <div class="tab-content admin-only" id="users">
+                    <div class="management-section">
+                        <div class="section-header">
+                        <div class="section-title">User Management</div>
+                        <button class="btn btn-primary" onclick="pos.showUserForm()"><i class="fas fa-user-plus"></i> Add User</button>
+                        </div>
+
+                        <!-- list -->
+                        <div style="flex:1;overflow-y:auto;">
+                        <table class="data-table">
+                            <thead><tr><th>ID</th><th>Username</th><th>Name</th><th>Role</th><th>Actions</th></tr></thead>
+                            <tbody id="usersTable"><tr><td colspan="5" class="loading">Loading users…</td></tbody>
+                        </table>
+                        </div>
+
+                        <!-- add / edit form -->
+                        <div class="card" id="userForm" style="margin-top:20px;display:none;">
+                        <h3 id="userFormTitle">Add User</h3>
+                        <form id="userFormElement" onsubmit="pos.saveUser(event)">
+                            <input type="hidden" id="userId">
+                            <div class="form-grid">
+                            <div class="form-group"><label>Username *</label><input type="text" id="uUsername" required></div>
+                            <div class="form-group"><label>Full Name *</label><input type="text" id="uName" required></div>
+                            <div class="form-group"><label>Role *</label>
+                                <select id="uRole"><option value="admin">Admin</option><option value="cashier">Cashier</option></select>
+                            </div>
+                            <div class="form-group"><label>New Password</label>
+                                <div style="position:relative;">
+                                <input type="password" id="uPassword" minlength="5" placeholder="Leave blank to keep current">
+                                <i class="fas fa-eye toggle-pw" onclick="pos.togglePw('uPassword')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;"></i>
+                                </div>
+                            </div>
+                            </div>
+                            <div style="display:flex;gap:10px;margin-top:15px;">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save User</button>
+                            <button type="button" class="btn btn-secondary" onclick="pos.cancelUserForm()"><i class="fas fa-times"></i> Cancel</button>
+                            </div>
+                        </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content admin-only" id="settings">
+                    <!-- Subscription Card -->
+                    <div class="card" style="background: linear-gradient(135deg, #3366ff 0%, #254fbf 100%); color: white; margin-bottom: 20px;">
+                        <h3 style="color: white;"><i class="fas fa-crown"></i> Subscription Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label style="color: rgba(255,255,255,0.8);">Current Plan</label>
+                                <div style="font-size: 1.3rem; font-weight: bold;" id="subscriptionPlan">Loading...</div>
+                            </div>
+                            <div class="form-group">
+                                <label style="color: rgba(255,255,255,0.8);">Days Remaining</label>
+                                <div style="font-size: 1.3rem; font-weight: bold;" id="subscriptionDays">Loading...</div>
+                            </div>
+                            <div class="form-group">
+                                <label style="color: rgba(255,255,255,0.8);">Payment Status</label>
+                                <div style="font-size: 1.3rem; font-weight: bold;" id="subscriptionStatus">Loading...</div>
+                            </div>
+                            <div class="form-group">
+                                <label style="color: rgba(255,255,255,0.8);">Expires On</label>
+                                <div style="font-size: 1.3rem; font-weight: bold;" id="subscriptionExpiry">Loading...</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; display: flex; gap: 10px;">
+                            <button class="btn" style="background: white; color: #3366ff;" onclick="pos.showUpgradeModal()"><i class="fas fa-arrow-up"></i> Upgrade Plan</button>
+                            <button class="btn" style="background: white; color: #3366ff;" onclick="pos.showPaymentModal()"><i class="fas fa-credit-card"></i> Pay Now</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>General Configuration</h3>
+                        <form id="settingsForm" onchange="pos.saveSettings()">
+                            <div class="form-grid">
+                                <div class="form-group form-full"><label for="settingCompanyName">Business Name</label><input type="text" id="settingCompanyName" value="Hardware Pro Business POS"></div>
+                                <div class="form-group"><label for="settingCurrency">Currency (KSH)</label><input type="text" id="settingCurrency" value="KSH" disabled></div>
+                                <div class="form-group"><label for="settingTaxRate">Sales Tax Rate (%)</label><input type="number" id="settingTaxRate" min="0" max="100" step="0.1" value="0"></div>
+                                <div class="form-group"><label for="settingLowStock">Low Stock Threshold</label><input type="number" id="settingLowStock" min="1" value="5"></div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card" style="margin-top: 20px;">
+                        <h3>Branding</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Company Logo <small>(square, max 200 KB)</small></label>
+                                <input type="file" id="logoFile" accept="image/*" onchange="pos.saveLogo()">
+                                <img id="logoPreview" class="img-thumb" src="" alt="Logo" style="display:none;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card" style="margin-top: 20px;">
+                        <h3>Data Management</h3>
+                        <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <button class="btn btn-secondary" onclick="pos.exportData()"><i class="fas fa-download"></i> Export All Data</button>
+                            <button class="btn btn-secondary" onclick="pos.importData()"><i class="fas fa-upload"></i> Import Data</button>
+                            <button class="btn btn-danger" onclick="pos.shutdownServer()"><i class="fas fa-power-off"></i> Shut Down POS Server</button>
+                            <button class="btn btn-danger" onclick="pos.factoryReset()"><i class="fas fa-undo"></i> Factory Reset</button>
+                            <button class="btn btn-danger" onclick="pos.clearAllData()"><i class="fas fa-eraser"></i> Clear All Data</button>
+                        </div>
+                        <input type="file" id="importFile" accept=".json" style="display: none;" onchange="pos.handleImport(event)">
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- --------------  JAVASCRIPT  -------------- -->
+    <script src="pos.js"></script>
+</body>
+</html>

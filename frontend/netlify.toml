@@ -1,0 +1,16 @@
+[build]
+  command = "echo 'Frontend ready for deployment'"
+  publish = "."
+
+# Redirect API calls to backend
+[[redirects]]
+  from = "/api/*"
+  to = "https://hardware-pos-backend.onrender.com/api/:splat"
+  status = 200
+  force = false
+
+# SPA routing - serve index page for all non-API routes
+[[redirects]]
+  from = "/*"
+  to = "/home.html"
+  status = 200

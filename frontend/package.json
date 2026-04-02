@@ -1,0 +1,20 @@
+{
+  "name": "hardware-pos-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Hardware POS - Point of Sale System",
+  "private": true,
+  "scripts": {
+    "start": "http-server . -p 3001",
+    "serve": "npx http-server . -p 3001"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.0"
+  },
+  "keywords": [
+    "pos",
+    "point-of-sale",
+    "hardware-store"
+  ],
+  "author": "kinyua138",
+  "license": "MIT"
+}

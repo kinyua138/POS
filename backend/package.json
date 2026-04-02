@@ -1,0 +1,49 @@
+{
+  "name": "hardware-pos-local-server",
+  "version": "1.0.0",
+  "description": "Local server and SQLite database for Hardware Pro POS",
+  "main": "server.js",
+  "bin": "server.js",
+  "private": true,
+  "pkg": {
+    "scripts": [
+      "server.js",
+      "pos.js"
+    ],
+    "assets": [
+      "pos.html",
+      "pos.css",
+      "pos.js",
+      "native/*",
+      "node_modules/sqlite3/lib/binding/node-v108-win32-x64/node_sqlite3.node",
+      "node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node"
+    ],
+    "outputPath": ".",
+    "targets": [
+      "node18-win-x64"
+    ],
+    "config": {
+      "pkg": {
+        "scripts": "concatenate"
+      }
+    }
+  },
+  "scripts": {
+    "start": "node server.js",
+    "build": "pkg . --targets node18-win-x64 --output Hardware-POS-Mongo.exe --options no-warnings --public --public-packages \"*\" --no-bytecode --compress GZip"
+  },
+  "dependencies": {
+    "axios": "^1.14.0",
+    "bcrypt": "^5.1.1",
+    "connect-mongo": "^5.0.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.0",
+    "express-rate-limit": "^6.7.0",
+    "express-session": "^1.17.3",
+    "express-validator": "^7.0.1",
+    "mongoose": "^9.3.3",
+    "sqlite3": "^6.0.1"
+  }
+}
