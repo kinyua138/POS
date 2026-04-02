@@ -1,7 +1,7 @@
 // ====================  DATABASE LAYER (API CLIENT)  ====================
 class DatabaseManager {
     constructor() {
-        this.baseUrl = '';
+        this.baseUrl = 'https://pos-kbaq.onrender.com';
     }
 
     async request(path, options = {}) {
@@ -230,7 +230,7 @@ class HardwarePOS {
     // ---------- AUTH ----------
     async checkSession() {
             try {
-                const response = await fetch('/api/session', { credentials: 'include' });
+                const response = await fetch('https://pos-kbaq.onrender.com/api/session', { credentials: 'include' });
                 return await response.json();
             } catch {
                 return { loggedIn: false };
@@ -239,7 +239,7 @@ class HardwarePOS {
 
     async login(username, password) {
             try {
-                const response = await fetch('/api/login', {
+                const response = await fetch('https://pos-kbaq.onrender.com/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include', // CRITICAL for cookies
@@ -264,7 +264,7 @@ class HardwarePOS {
     
     async logout() {
             try {
-                await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+                await fetch('https://pos-kbaq.onrender.com/api/logout', { method: 'POST', credentials: 'include' });
                 this.currentUser = null;
                 location.reload();
             } catch (e) {

@@ -212,7 +212,7 @@ async function handleLoginForm() {
     }
 
     try {
-        const response = await fetch('/api/login', {
+        const response = await fetch('https://pos-kbaq.onrender.com/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -271,7 +271,7 @@ async function handleRegisterForm() {
 
 async function createTrialAccount(fullName, email, phone, companyName) {
     try {
-        const response = await fetch('/api/trial/create', {
+        const response = await fetch('https://pos-kbaq.onrender.com/api/trial/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -301,7 +301,7 @@ async function createTrialAccount(fullName, email, phone, companyName) {
 async function createPaidAccount(fullName, email, phone, companyName, password) {
     try {
         // Create account without payment first
-        const response = await fetch('/api/subscription/create-account', {
+        const response = await fetch('https://pos-kbaq.onrender.com/api/subscription/create-account', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -333,7 +333,7 @@ async function createPaidAccount(fullName, email, phone, companyName, password) 
 
 async function autoLoginUser(email, password) {
     try {
-        await fetch('/api/login', {
+        await fetch('https://pos-kbaq.onrender.com/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -388,7 +388,7 @@ let googleClientId = '';
 
 function initGoogleOAuth() {
     // Fetch Google Client ID from server
-    fetch('/api/config/google-client-id')
+    fetch('https://pos-kbaq.onrender.com/api/config/google-client-id')
         .then(res => res.json())
         .then(data => {
             googleClientId = data.clientId;
@@ -463,7 +463,7 @@ async function handleGoogleSignIn(response, isSignUp) {
             amount: selectedPlan.amount
         };
 
-        const apiResponse = await fetch('/api/auth/google', {
+        const apiResponse = await fetch('https://pos-kbaq.onrender.com/api/auth/google', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
