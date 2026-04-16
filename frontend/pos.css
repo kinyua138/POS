@@ -112,15 +112,224 @@ body.modal-active {
     max-height: 90vh; /* Added: Limit height on tall content for scrollability */
     overflow-y: auto; /* Added: Enable vertical scrolling */
 }
+#canvas-container {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: #020611;
+}
+
+#canvas-container canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
 .app-container {
     min-height: calc(100vh - 40px); background: rgba(255,255,255,.95);
     border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,.1);
-    display: none; flex-direction: row; overflow: hidden; backdrop-filter: blur(10px);
+    display: flex; flex-direction: row; overflow: hidden; backdrop-filter: blur(10px);
+    position: relative; z-index: 1;
 }
-.sidebar {
-    width: 260px; background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%);
-    display: flex; flex-direction: column; position: relative;
+
+.app-container.dashboard-mode {
+    background: transparent;
+    box-shadow: none;
 }
+
+.app-container.dashboard-mode .sidebar {
+    width: 0;
+    min-width: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: width .4s ease, opacity .4s ease;
+}
+
+.app-container.dashboard-mode .main-content {
+    flex: 1;
+}
+
+.app-container.dashboard-mode .sidebar {
+    background: rgba(7,18,30,0.82);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+    backdrop-filter: blur(18px);
+}
+
+.app-container.dashboard-mode .top-bar {
+    background: rgba(8,18,32,0.75);
+    border-bottom-color: rgba(255,255,255,0.08);
+    color: #fff;
+}
+
+.app-container.dashboard-mode .top-bar .page-title,
+.app-container.dashboard-mode .top-bar .user-menu {
+    color: #fff;
+}
+
+.app-container.dashboard-mode .content-area {
+    background: transparent;
+    padding: 20px;
+}
+
+.drone-dashboard {
+    position: relative;
+    min-height: calc(100vh - 160px);
+}
+
+.drone-dashboard .dashboard {
+    position: relative;
+    z-index: 2;
+    min-height: 100%;
+    background: rgba(8, 20, 34, 0.76);
+    border: 1px solid rgba(0, 255, 200, 0.18);
+    border-radius: 28px;
+    padding: 26px;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.42);
+    backdrop-filter: blur(20px);
+}
+
+.drone-dashboard .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.drone-dashboard .title-section h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #ffffff, #a0d0ff, #6eb8ff);
+    -webkit-background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 30px rgba(0, 160, 255, 0.4);
+}
+
+.drone-dashboard .title-section .sub {
+    color: #8ab3d0;
+    font-size: 0.95rem;
+    letter-spacing: 3px;
+    margin-top: -5px;
+}
+
+.drone-dashboard .status-badge {
+    background: rgba(0, 40, 60, 0.72);
+    backdrop-filter: blur(12px);
+    padding: 12px 28px;
+    border-radius: 40px;
+    border: 1px solid rgba(0, 255, 200, 0.4);
+    color: #0ef;
+    font-weight: 500;
+    box-shadow: 0 0 30px rgba(0, 255, 200, 0.2);
+}
+
+.drone-dashboard .status-badge i {
+    margin-right: 10px;
+    color: #0ef;
+}
+
+.drone-dashboard .main-grid {
+    display: flex;
+    flex: 1;
+    gap: 22px;
+    min-height: 0;
+}
+
+.drone-dashboard .left-column,
+.drone-dashboard .right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.drone-dashboard .left-column { flex: 0.95; }
+.drone-dashboard .right-column { flex: 1.05; }
+
+.drone-dashboard .card {
+    background: rgba(8, 20, 32, 0.65);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(0, 180, 220, 0.25);
+    border-radius: 28px;
+    padding: 22px 24px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.05);
+    transition: border 0.2s;
+}
+
+.drone-dashboard .card:hover {
+    border-color: rgba(0, 255, 200, 0.5);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(0, 255, 200, 0.15);
+}
+
+.drone-dashboard .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    color: #c0e4ff;
+    font-weight: 500;
+    letter-spacing: 1px;
+    font-size: 1.1rem;
+    border-bottom: 1px solid rgba(0, 200, 255, 0.2);
+    padding-bottom: 12px;
+}
+
+.drone-dashboard .card-header i {
+    color: #0ef;
+    font-size: 1.3rem;
+    filter: drop-shadow(0 0 12px cyan);
+}
+
+.drone-dashboard .data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    color: #d0e8ff;
+    font-size: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.drone-dashboard .data-row:last-child {
+    border-bottom: none;
+}
+
+.drone-dashboard .data-label { opacity: 0.8; font-weight: 400; }
+.drone-dashboard .data-value { font-weight: 600; color: #ffffff; background: rgba(0, 50, 70, 0.4); padding: 4px 14px; border-radius: 40px; border: 1px solid rgba(0, 255, 200, 0.2); backdrop-filter: blur(5px); }
+.drone-dashboard .highlight { color: #0ef; text-shadow: 0 0 10px cyan; }
+
+.drone-dashboard .weather-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px 20px; margin-top: 5px; }
+.drone-dashboard .weather-item { display: flex; align-items: center; gap: 12px; }
+.drone-dashboard .weather-icon { width: 40px; height: 40px; background: rgba(0, 100, 130, 0.3); border-radius: 14px; display: flex; align-items: center; justify-content: center; border: 1px solid #0ef4; }
+.drone-dashboard .weather-icon i { font-size: 1.4rem; color: #0ef; }
+.drone-dashboard .weather-info .label { font-size: 0.8rem; color: #9bbcd0; }
+.drone-dashboard .weather-info .value { font-size: 1.4rem; font-weight: 700; color: #fff; }
+
+.drone-dashboard .progress-container { margin: 15px 0 5px; }
+.drone-dashboard .progress-label { display: flex; justify-content: space-between; margin-bottom: 5px; color: #b0d4ec; }
+.drone-dashboard .progress-bar-bg { height: 8px; background: #0a1f2e; border-radius: 10px; overflow: hidden; box-shadow: inset 0 2px 5px #000; }
+.drone-dashboard .progress-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, #0ef, #4affb5); box-shadow: 0 0 15px #0ef; width: 0%; }
+.drone-dashboard .fill-orange { background: linear-gradient(90deg, #ff8c00, #ff5500); box-shadow: 0 0 15px #ff6600; }
+.drone-dashboard .fill-red { background: linear-gradient(90deg, #ff4444, #cc0000); box-shadow: 0 0 15px #ff3333; }
+
+.drone-dashboard .drone-list { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; margin-top: 8px; }
+.drone-dashboard .drone-item { display: flex; align-items: center; gap: 12px; }
+.drone-dashboard .drone-name { min-width: 80px; color: #b8d8f0; }
+.drone-dashboard .battery-bar { flex: 1; height: 6px; background: #132a38; border-radius: 8px; overflow: hidden; }
+.drone-dashboard .battery-level { height: 100%; border-radius: 8px; background: #0ef; box-shadow: 0 0 10px #0ef; }
+.drone-dashboard .battery-text { min-width: 40px; text-align: right; font-weight: 600; color: #fff; }
+.drone-dashboard .critical { background: #ff5533; box-shadow: 0 0 10px #ff5533; }
+.drone-dashboard .action-bar { display: flex; gap: 18px; margin-top: 18px; pointer-events: auto; flex-wrap: wrap; }
+.drone-dashboard .action-btn { background: rgba(0, 50, 70, 0.6); backdrop-filter: blur(12px); border: 1.5px solid #0a7a8c; color: #e0f0ff; padding: 14px 32px; border-radius: 50px; font-weight: 600; font-size: 1.1rem; letter-spacing: 1.5px; cursor: pointer; transition: all 0.25s; box-shadow: 0 5px 15px #0000004d; display: flex; align-items: center; gap: 12px; flex: 0 1 auto; }
+.drone-dashboard .action-btn i { color: #0ef; }
+.drone-dashboard .action-btn:hover { background: #0a5f70; border-color: #0ef; box-shadow: 0 0 30px #0ef6, 0 8px 20px #000; transform: translateY(-3px); }
+
+@media (max-width: 1000px) {
+    .drone-dashboard .main-grid { flex-direction: column; }
+    .drone-dashboard .dashboard { padding: 18px; }
+    .drone-dashboard .action-bar { justify-content: center; }
+}
+
 .logo-container { padding: 25px; display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,.1); backdrop-filter: blur(10px); }
 .logo-icon {
     font-size: 28px; color: var(--white); background: rgba(255,255,255,.2);

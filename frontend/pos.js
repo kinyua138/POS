@@ -311,7 +311,6 @@ class HardwarePOS {
     }
     showLoginScreen() { 
         document.getElementById('loginOverlay').style.display = 'flex'; 
-        document.getElementById('appContainer').style.display = 'none';
         document.body.classList.add('login-active');
     }
     showFirstRunWizard() { 
@@ -840,6 +839,7 @@ For technical support, contact info@hardwarepos.com
         this.currentTab = tab;
         document.querySelectorAll('.tab-content').forEach(t => t.style.display = (t.id === tab) ? 'block' : 'none');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === tab));
+        document.getElementById('appContainer').classList.toggle('dashboard-mode', tab === 'dashboard');
         document.getElementById('pageTitle').textContent = tab.charAt(0).toUpperCase() + tab.slice(1);
         if (tab === 'dashboard') this.updateDashboard();
         if (tab === 'pos') this.loadProducts();
@@ -849,7 +849,7 @@ For technical support, contact info@hardwarepos.com
         if (tab === 'suppliers') this.loadSuppliers();
         if (tab === 'invoices') { this.loadInvoices(); this.loadCustomersForInvoice(); }
         if (tab === 'users') this.loadUsers();
-        if (tab === 'settings') {this.loadSettingsForm(); }  // <-- add this}
+        if (tab === 'settings') {this.loadSettingsForm(); }
     }
 
     recentSalesRange = 'day';   // cashier default
